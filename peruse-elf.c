@@ -51,6 +51,7 @@ int main(int argc, char *argv[])
 	printf("e_shentsize: 0x%x\n", header->e_shentsize);
 	printf("e_shnum: 0x%x\n", header->e_shnum);
 	printf("e_shstrndx: 0x%x\n", header->e_shstrndx);
+	free(buffer);
     return 0;
 }
 
