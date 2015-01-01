@@ -64,3 +64,13 @@ enum elf_version {
 	EV_NONE,
 	EV_CURRENT
 };
+
+enum elf_type {
+	ETNONE,
+	ETREL,
+	ETEXEC,
+	ETDYN,
+	ETCORE,
+	ETLOPROC = 0xff00,
+	ETHIPROC = 0xffff
+};

@@ -6,10 +6,45 @@
 #include <stdlib.h>
 #include "elf.h"
 
+/* function to printf the elf type */
+static void print_elf_type(Elf32_Half type)
+{
+	printf ("ELF TYPE :-\n");
+
+	/* print elf type */
+	switch (type)
+	{
+		case ETNONE:
+			printf ("NONE\n");
+			break;
+		case ETREL:
+			printf ("Relocatable file\n");
+			break;
+		case ETEXEC:
+			printf ("Executable file\n");
+			break;
+		case ETDYN:
+			printf ("Shared Object file\n");
+			break;
+		case ETCORE:
+			printf ("Core file\n");
+			break;
+		case ETLOPROC:
+		case ETHIPROC:
+			printf ("Processor Specific file\n");
+			break;
+		default:
+			printf ("ERR: invalid elf file type\n");
+			break;
+	}
+
+	printf ("\n");
+}
+
 /* function to printf the elf ident details */
 static void print_elf_ident(const Elf32_Char ident[])
 {
-	printf ("ELF IDENTIFICATION DETAILS :-\n");
+	printf ("\nELF IDENTIFICATION DETAILS :-\n");
 
 	/* print elf class */
 	printf ("ELF CLASS: ");
@@ -128,7 +163,7 @@ int main(int argc, char *argv[])
 
 	/* print all the elf header details */
 	print_elf_ident(header->e_ident);
-	printf("e_type: 0x%x\n", header->e_type);
+	print_elf_type(header->e_type);
 	printf("e_machine: 0x%x\n", header->e_machine);
 	printf("e_version: 0x%x\n", header->e_version);
 	printf("e_entry: 0x%x\n", header->e_entry);
