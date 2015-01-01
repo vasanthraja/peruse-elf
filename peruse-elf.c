@@ -6,6 +6,78 @@
 #include <stdlib.h>
 #include "elf.h"
 
+/* function to printf the elf ident details */
+static void print_elf_ident(const Elf32_Char ident[])
+{
+	printf ("ELF IDENTIFICATION DETAILS :-\n");
+
+	/* print elf class */
+	printf ("ELF CLASS: ");
+	switch (ident[EI_CLASS])
+	{
+		case ELFCLASSNONE:
+			printf ("NONE\n");
+			break;
+		case ELFCLASS32:
+			printf ("CLASS 32\n");
+			break;
+		case ELFCLASS64:
+			printf ("CLASS 64\n");
+			break;
+		default:
+			printf ("ERR: invalid elf class\n");
+			break;
+	}
+
+	/* print elf data/endianess */
+	printf ("ELF DATA: ");
+	switch (ident[EI_DATA])
+	{
+		case ELFDATANONE:
+			printf ("NONE! Invalid\n");
+			break;
+		case ELFDATA2LSB:
+			printf ("DATA2LSB (Little endian)\n");
+			break;
+		case ELFDATA2MSB:
+			printf ("DATA2MSB (Big endian)\n");
+			break;
+		default:
+			printf ("ERR: invalid elf data\n");
+			break;
+	}
+
+	/* print elf version */
+	printf ("ELF VERSION: ");
+	switch (ident[EI_VERSION])
+	{
+		case EV_NONE:
+			printf ("NONE! Invalid\n");
+			break;
+		case EV_CURRENT:
+			printf ("CURRENT\n");
+			break;
+		default:
+			printf ("ERR: invalid elf version\n");
+			break;
+	}
+
+	printf ("\n");
+}
+
+/* function to validate the elf ident */
+static elf_status validate_elf_ident(const Elf32_Char ident[])
+{
+	/* check magic number 0x7f and 'E' 'L' 'F' in ident */
+	if (ident[EI_MAG0] != 0x7f || !IS_ELF(ident)) {
+		/* if signature not found, return failure */
+		return ELF_FAILURE;
+	}
+
+	/* return success */
+	return ELF_SUCCESS;
+}
+
 int main(int argc, char *argv[])
 {
 	FILE *fp = NULL;
@@ -48,8 +120,14 @@ int main(int argc, char *argv[])
 	/* typecast buffer to Elf32_Ehdr */
 	header = (Elf32_Ehdr *)buffer;
 
-	/* print all the elf header values */
-	printf("e_ident: %s\n", header->e_ident);
+	/* validate the elf identification */
+	if(validate_elf_ident(header->e_ident) != 0) {
+		printf ("ELF: ERR: Invalid elf header found!\n");
+		return EXIT_FAILURE;
+	}
+
+	/* print all the elf header details */
+	print_elf_ident(header->e_ident);
 	printf("e_type: 0x%x\n", header->e_type);
 	printf("e_machine: 0x%x\n", header->e_machine);
 	printf("e_version: 0x%x\n", header->e_version);

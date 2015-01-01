@@ -24,3 +24,43 @@ typedef struct {
     Elf32_Half  e_shnum;
     Elf32_Half  e_shstrndx;
 }Elf32_Ehdr;
+
+enum elf_ident {
+	EI_MAG0,
+	EI_MAG1,
+	EI_MAG2,
+	EI_MAG3,
+	EI_CLASS,
+	EI_DATA,
+	EI_VERSION,
+	EI_PAD,
+	EI_NIDENT = ELF_NIDENT
+};
+
+#define IS_ELF(i) ((i[EI_MAG1] == 'E') && \
+			(i[EI_MAG2] == 'L') && \
+			(i[EI_MAG3] == 'F'))
+
+typedef enum {
+	ELF_SUCCESS,
+	ELF_FAILURE,
+	ELF_BADARG,
+	ELF_OUTRANGE
+} elf_status;
+
+enum elf_class {
+	ELFCLASSNONE,
+	ELFCLASS32,
+	ELFCLASS64
+};
+
+enum elf_data {
+	ELFDATANONE,
+	ELFDATA2LSB,
+	ELFDATA2MSB
+};
+
+enum elf_version {
+	EV_NONE,
+	EV_CURRENT
+};
