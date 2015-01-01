@@ -5,10 +5,11 @@ typedef uint32_t Elf32_Off;     // Unsigned offset
 typedef uint32_t Elf32_Addr;    // Unsigned address
 typedef uint32_t Elf32_Word;    // Unsigned int
 typedef int32_t  Elf32_Sword;   // Signed int
+typedef uint8_t  Elf32_Char;	// Signed char
 
 #define ELF_NIDENT 0x10
 typedef struct {
-    uint8_t     e_ident[ELF_NIDENT];
+    Elf32_Char  e_ident[ELF_NIDENT];
     Elf32_Half  e_type;
     Elf32_Half  e_machine;
     Elf32_Word  e_version;
