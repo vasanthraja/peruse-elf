@@ -1,0 +1,5 @@
+# Object files
+*.o
+
+# peruse-elf output binary file
+source/peruse-elf
