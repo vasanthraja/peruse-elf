@@ -1,4 +1,8 @@
-/* This code is for reading the elf header from
+/* Copyright 2014
+ * Author : Vasanth Raja Chittampally
+ * Date of Creation : 22/12/2014
+ *
+ * This code is for reading the elf header from
  * the given elf binary file
  */
 
@@ -6,98 +10,113 @@
 #include <stdlib.h>
 #include "elf.h"
 
-/* function to printf the elf type */
+/* global variable to hold the elf trace level */
+enum trace_level elf_trace_level;
+
+/* elf function to filter level and print log/traces */
+void elf_printf(enum trace_level level, char *format, ...)
+{
+	va_list args;
+
+	if (level <= elf_trace_level) {
+		va_start(args, format);
+		vprintf(format, args);
+		va_end(args);
+	}
+}
+
+/* function to print the elf type */
 static void print_elf_type(Elf32_Half type)
 {
-	printf ("ELF TYPE :-\n");
+	ELF_PRINT(ELF_INFORM, "ELF TYPE :-\n");
 
 	/* print elf type */
 	switch (type)
 	{
 		case ETNONE:
-			printf ("NONE\n");
+			ELF_PRINT(ELF_WARN, "NONE\n");
 			break;
 		case ETREL:
-			printf ("Relocatable file\n");
+			ELF_PRINT(ELF_INFORM, "Relocatable file\n");
 			break;
 		case ETEXEC:
-			printf ("Executable file\n");
+			ELF_PRINT(ELF_INFORM, "Executable file\n");
 			break;
 		case ETDYN:
-			printf ("Shared Object file\n");
+			ELF_PRINT(ELF_INFORM, "Shared Object file\n");
 			break;
 		case ETCORE:
-			printf ("Core file\n");
+			ELF_PRINT(ELF_INFORM, "Core file\n");
 			break;
 		case ETLOPROC:
 		case ETHIPROC:
-			printf ("Processor Specific file\n");
+			ELF_PRINT(ELF_INFORM, "Processor Specific file\n");
 			break;
 		default:
-			printf ("ERR: invalid elf file type\n");
+			ELF_PRINT(ELF_ERROR, "ERR: invalid elf file type\n");
 			break;
 	}
 
-	printf ("\n");
+	ELF_PRINT(ELF_INFORM, "\n");
 }
 
 /* function to printf the elf ident details */
 static void print_elf_ident(const Elf32_Char ident[])
 {
-	printf ("\nELF IDENTIFICATION DETAILS :-\n");
+	ELF_PRINT(ELF_INFORM, "\nELF IDENTIFICATION DETAILS :-\n");
 
 	/* print elf class */
-	printf ("ELF CLASS: ");
+	ELF_PRINT(ELF_INFORM, "ELF CLASS: ");
 	switch (ident[EI_CLASS])
 	{
 		case ELFCLASSNONE:
-			printf ("NONE\n");
+			ELF_PRINT(ELF_WARN, "NONE\n");
 			break;
 		case ELFCLASS32:
-			printf ("CLASS 32\n");
+			ELF_PRINT(ELF_INFORM, "CLASS 32\n");
 			break;
 		case ELFCLASS64:
-			printf ("CLASS 64\n");
+			ELF_PRINT(ELF_INFORM, "CLASS 64\n");
 			break;
 		default:
-			printf ("ERR: invalid elf class\n");
+			ELF_PRINT(ELF_ERROR, "ERR: invalid elf class\n");
 			break;
 	}
 
 	/* print elf data/endianess */
-	printf ("ELF DATA: ");
+	ELF_PRINT(ELF_INFORM, "ELF DATA: ");
 	switch (ident[EI_DATA])
 	{
 		case ELFDATANONE:
-			printf ("NONE! Invalid\n");
+			ELF_PRINT(ELF_INFORM, "NONE! Invalid\n");
 			break;
 		case ELFDATA2LSB:
-			printf ("DATA2LSB (Little endian)\n");
+			ELF_PRINT(ELF_INFORM, "DATA2LSB (Little endian)\n");
 			break;
 		case ELFDATA2MSB:
-			printf ("DATA2MSB (Big endian)\n");
+			ELF_PRINT(ELF_INFORM, "DATA2MSB (Big endian)\n");
 			break;
 		default:
-			printf ("ERR: invalid elf data\n");
+			ELF_PRINT(ELF_ERROR, "ERR: invalid elf data\n");
 			break;
 	}
 
 	/* print elf version */
-	printf ("ELF VERSION: ");
+	ELF_PRINT(ELF_INFORM, "ELF VERSION: ");
 	switch (ident[EI_VERSION])
 	{
 		case EV_NONE:
-			printf ("NONE! Invalid\n");
+			ELF_PRINT(ELF_WARN, "NONE! Invalid\n");
 			break;
 		case EV_CURRENT:
-			printf ("CURRENT\n");
+			ELF_PRINT(ELF_INFORM, "CURRENT\n");
 			break;
 		default:
-			printf ("ERR: invalid elf version\n");
+			ELF_PRINT(ELF_INFORM, "ERR: invalid elf version\n");
 			break;
 	}
 
-	printf ("\n");
+	ELF_PRINT(ELF_INFORM, "\n");
 }
 
 /* function to validate the elf ident */
@@ -120,33 +139,40 @@ int main(int argc, char *argv[])
 	Elf32_Ehdr *header = NULL;
 	int len;
 
+	/* initiate the trace level */
+	elf_trace_level = ELF_INFORM;
+
+	ELF_PRINT(ELF_DBG, "DBG: Validating input file name\n");
 	/* validae the input file name */
 	if (argv[1] == NULL) {
-		printf("You need to provide the elf file name\n");
+		ELF_PRINT(ELF_ERROR, "You need to provide the elf file name\n");
 		return EXIT_FAILURE;
 	} else {
+		ELF_PRINT(ELF_DBG, "DBG: Opening %s file\n", argv[1]);
 		/* open the elf file provided in read binary mode */
 		fp = fopen(argv[1], "rb");
 		if (!fp) {
 			/* file not found, return failure */
-			printf("file not found !!! Please check the file\n");
+			ELF_PRINT(ELF_ERROR, "file not found !!! Please check the file\n");
 			return EXIT_FAILURE;
 		}
 	}
 
+	ELF_PRINT(ELF_DBG, "DBG: Allocating Elf32_Ehdr\n");
 	/* allocate buffer to hold Elf32_Ehdr */
 	buffer = (char *)malloc(sizeof(Elf32_Ehdr));
 	if (!buffer) {
 		/* No memory, return failure */
-		printf("ERROR: Buffer allocation failed\n");
+		ELF_PRINT(ELF_ERROR, "ERROR: Buffer allocation failed\n");
 		return EXIT_FAILURE;
 	}
 
+	ELF_PRINT(ELF_DBG, "DBG: Reading elf hearder from file\n");
 	/* read the elf file */
 	len = fread(buffer, 1, sizeof(Elf32_Ehdr), fp);
 	if (len != sizeof(Elf32_Ehdr)) {
-		printf("Failed to read the file %s\n", argv[1]);
-		printf("ERROR: bytes read: %d\n", len);
+		ELF_PRINT(ELF_ERROR, "Failed to read the file %s\n", argv[1]);
+		ELF_PRINT(ELF_ERROR, "ERROR: bytes read: %d\n", len);
 		/* failed to read, free up the buffer and return failure */
 		free(buffer);
 		return EXIT_FAILURE;
@@ -155,28 +181,31 @@ int main(int argc, char *argv[])
 	/* typecast buffer to Elf32_Ehdr */
 	header = (Elf32_Ehdr *)buffer;
 
+	ELF_PRINT(ELF_DBG, "DBG: Validating elf header\n");
 	/* validate the elf identification */
 	if(validate_elf_ident(header->e_ident) != 0) {
-		printf ("ELF: ERR: Invalid elf header found!\n");
+		ELF_PRINT(ELF_ERROR, "ELF: ERR: Invalid elf header found!\n");
 		return EXIT_FAILURE;
 	}
+	ELF_PRINT(ELF_DBG, "DBG: Validation elf header success\n");
 
 	/* print all the elf header details */
 	print_elf_ident(header->e_ident);
 	print_elf_type(header->e_type);
-	printf("e_machine: 0x%x\n", header->e_machine);
-	printf("e_version: 0x%x\n", header->e_version);
-	printf("e_entry: 0x%x\n", header->e_entry);
-	printf("e_phoff: 0x%x\n", header->e_phoff);
-	printf("e_shoff: 0x%x\n", header->e_shoff);
-	printf("e_flags: 0x%x\n", header->e_flags);
-	printf("e_ehsize: 0x%x\n", header->e_ehsize);
-	printf("e_phentsize: 0x%x\n", header->e_phentsize);
-	printf("e_phnum: 0x%x\n", header->e_phnum);
-	printf("e_shentsize: 0x%x\n", header->e_shentsize);
-	printf("e_shnum: 0x%x\n", header->e_shnum);
-	printf("e_shstrndx: 0x%x\n", header->e_shstrndx);
+	ELF_PRINT(ELF_INFORM, "e_machine: 0x%x\n", header->e_machine);
+	ELF_PRINT(ELF_INFORM, "e_version: 0x%x\n", header->e_version);
+	ELF_PRINT(ELF_INFORM, "e_entry: 0x%x\n", header->e_entry);
+	ELF_PRINT(ELF_INFORM, "e_phoff: 0x%x\n", header->e_phoff);
+	ELF_PRINT(ELF_INFORM, "e_shoff: 0x%x\n", header->e_shoff);
+	ELF_PRINT(ELF_INFORM, "e_flags: 0x%x\n", header->e_flags);
+	ELF_PRINT(ELF_INFORM, "e_ehsize: 0x%x\n", header->e_ehsize);
+	ELF_PRINT(ELF_INFORM, "e_phentsize: 0x%x\n", header->e_phentsize);
+	ELF_PRINT(ELF_INFORM, "e_phnum: 0x%x\n", header->e_phnum);
+	ELF_PRINT(ELF_INFORM, "e_shentsize: 0x%x\n", header->e_shentsize);
+	ELF_PRINT(ELF_INFORM, "e_shnum: 0x%x\n", header->e_shnum);
+	ELF_PRINT(ELF_INFORM, "e_shstrndx: 0x%x\n", header->e_shstrndx);
 
+	ELF_PRINT(ELF_DBG, "DBG: Free up the allocated buffer\n");
 	/* free up allocated buffer */
 	free(buffer);
 

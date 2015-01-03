@@ -1,4 +1,17 @@
+/* Copyright 2014
+ * Author : Vasanth Raja Chittampally
+ * Date of Creation : 22/12/2014
+ *
+ * This file is main elf header file which contains
+ * useful structure, enum definations
+ */
+
+#ifndef __ELF_H__
+#define __ELF_H__
+
 #include <stdint.h>
+#include <stdarg.h>
+#include "elf_trace.h"
 
 typedef uint16_t Elf32_Half;    // Unsigned half int
 typedef uint32_t Elf32_Off;     // Unsigned offset
@@ -74,3 +87,5 @@ enum elf_type {
 	ETLOPROC = 0xff00,
 	ETHIPROC = 0xffff
 };
+
+#endif /* __ELF_H__ */
